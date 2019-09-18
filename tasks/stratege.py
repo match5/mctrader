@@ -27,6 +27,7 @@ def kill_running(sid):
         th = running_threads.get(sid, None)
         if th and th.ready():
             th.kill()
+            del running_threads[sid]
         del running_strategy[sid]
     gevent.spawn(wapper)
 
@@ -50,8 +51,10 @@ def run_today(sid):
             },
             'mctrader': {
                 'enabled': True,
+                'log_file': os.path.join(LOG_DIR, '%s.log' % (date.replace('-', ''))),
             },
-        }
+        },
     }
+
     th = gevent.spawn(lambda: rqalpha.run_file(info['path'], config))
     running_threads[sid] = th
