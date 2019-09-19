@@ -1,4 +1,4 @@
 **/*.pyc
-logs/*
+*.log
 strateges/*
 config.yml

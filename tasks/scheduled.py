@@ -1,14 +1,16 @@
 import gevent
-import schedule as scheduler
+from multiprocessing import Process
+
 import time
 
 import rqalpha
+import schedule as scheduler
 
 from . import running_strategy
 from .stratege import run_today
 
 def run_scheduled_tasks():
-    scheduler.every().day.at('16:00').do(update_bundle)
+    scheduler.every().day.at('20:00').do(update_bundle)
     scheduler.every().day.at('09:00').do(start_trading)
     def wapper():
         while True:
@@ -20,5 +22,7 @@ def update_bundle():
     gevent.spawn(lambda: rqalpha.update_bundle())
 
 def start_trading():
-    for sid in running_strategy.keys():
-        gevent.spawn(lambda: run_today(sid))
+    def wapper():
+        for sid in running_strategy.keys():
+            run_today(sid)
+    gevent.spawn(wapper)

@@ -1,7 +1,12 @@
 import gevent
-from . import running_strategy, running_threads
-import rqalpha
+from multiprocessing import Process
+
+import os
 import datetime
+
+import rqalpha
+
+from . import running_strategy, running_process
 
 next_sid = 1001
 
@@ -20,26 +25,25 @@ def create_running(path, name='unnamed'):
         run_today(sid)
 
 def kill_running(sid):
-    def wapper():
-        info = running_strategy.get(sid, None)
-        if info is None:
-            raise Exception('sid:%s not exists' % (sid,))
-        th = running_threads.get(sid, None)
-        if th and th.ready():
-            th.kill()
-            del running_threads[sid]
-        del running_strategy[sid]
-    gevent.spawn(wapper)
+    info = running_strategy.get(sid, None)
+    if info is None:
+        raise Exception('sid:%s not exists' % (sid,))
+    pro = running_process.get(sid, None)
+    if pro and pro.is_alive():
+        pro.terminate()
+        del running_process[sid]
+    del running_strategy[sid]
 
 
 def run_today(sid):
     info = running_strategy.get(sid, None)
     if info is None:
         raise Exception('sid:%s not exists' % (sid,))
-    th = running_threads.get(sid, None)
-    if th and not th.ready():
+    pro = running_process.get(sid, None)
+    if pro and pro.is_alive():
         raise Exception('sid:%s is running' % (sid,))
     date = datetime.date.today().strftime("%Y-%m-%d")
+    log_file = os.path.join('logs', '%s_%s.log' % (sid, info['start_date'].replace('-', '')))
     config = {
         'base': {
             'start_date': date,
@@ -49,12 +53,16 @@ def run_today(sid):
             'sys_simulation': {
                 'enabled': False,
             },
+            'sys_benchmark': {
+                'enabled': False,
+            },
             'mctrader': {
                 'enabled': True,
-                'log_file': os.path.join(LOG_DIR, '%s.log' % (date.replace('-', ''))),
+                'log_file': log_file,
             },
         },
     }
-
-    th = gevent.spawn(lambda: rqalpha.run_file(info['path'], config))
-    running_threads[sid] = th
+    pro = Process(target=lambda: rqalpha.run_file(info['path'], config))
+    pro.daemon = True
+    running_process[sid] = pro
+    pro.start()

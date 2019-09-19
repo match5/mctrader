@@ -1,2 +1,2 @@
 running_strategy = {}
-running_threads = {}
+running_process = {}

@@ -16,9 +16,9 @@ class Stratege:
         'list all strateges'
         lines = ''
         for info in running_strategy.values():
-            lines = lines + ('\t%s\t%s\t%s\t%s\n' % (info['sid'], info['name'], info['start_date'], info['path']))
+            lines = lines + ('\t%s\t%s\t%s\t\t%s\n' % (info['sid'], info['start_date'], info['name'], info['path']))
         if lines:
-            cprint('\tsid\tname\tstart_date\tpath\n' + lines, 'green')
+            cprint('\tsid\tstart_date\tname\t\tpath\n' + lines, 'green')
 
     @command
     @argument('path', type=str, positional=True, description='path of you stratege file')
