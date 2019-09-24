@@ -1,5 +1,5 @@
-import gevent
 from multiprocessing import Process
+import threading
 
 import time
 
@@ -16,13 +16,17 @@ def run_scheduled_tasks():
         while True:
             scheduler.run_pending()
             time.sleep(1)
-    gevent.spawn(wapper)
+    t = threading.Thread(target=wapper)
+    t.setDaemon(True)
+    t.start()
 
 def update_bundle():
-    gevent.spawn(lambda: rqalpha.update_bundle())
+    def wapper():
+        rqalpha.update_bundle()
+    t = threading.Thread(target=wapper)
+    t.setDaemon(True)
+    t.start()
 
 def start_trading():
-    def wapper():
-        for sid in running_strategy.keys():
-            run_today(sid)
-    gevent.spawn(wapper)
+    for sid in running_strategy.keys():
+        run_today(sid)
