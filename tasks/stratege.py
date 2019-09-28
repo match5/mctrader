@@ -6,7 +6,7 @@ from termcolor import cprint
 
 import rqalpha
 
-from . import running_strategy, running_process, strategy_lock
+from . import running_strategy, running_process
 
 next_sid = 1001
 
@@ -22,7 +22,7 @@ def create_running(path, name='unnamed'):
         'inited': False,
     }
     running_strategy[str(sid)] = info
-    if 9 < datetime.datetime.now().hour < 15:
+    if 9 <= datetime.datetime.now().hour < 15:
         run_today(sid)
 
 def kill_running(sid):
