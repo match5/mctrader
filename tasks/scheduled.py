@@ -7,7 +7,7 @@ import rqalpha
 import schedule as scheduler
 
 from . import running_strategy
-from .stratege import run_today
+from .stratege import run_today, start_trading
 
 def run_scheduled_tasks():
     scheduler.every().day.at('20:00').do(update_bundle)
@@ -20,13 +20,10 @@ def run_scheduled_tasks():
     t.setDaemon(True)
     t.start()
 
-def update_bundle():
+def update_bundle(join=False):
     def wapper():
         rqalpha.update_bundle()
-    t = threading.Thread(target=wapper)
-    t.setDaemon(True)
-    t.start()
-
-def start_trading():
-    for sid in running_strategy.keys():
-        run_today(sid)
+    p = Process(target=wapper)
+    p.start()
+    if join:
+        p.join()
