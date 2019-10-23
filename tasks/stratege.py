@@ -71,7 +71,7 @@ def run_today(sid, init, resume):
     if proc and proc.is_alive():
         raise Exception('sid:%s is running' % (sid,))
     date = datetime.date.today().strftime("%Y-%m-%d")
-    log_file = os.path.join('logs', '%s_%s.log' % (sid, info['start_date'].replace('-', '')))
+    log_file = os.path.join('logs', '%s_%s_%s.log' % (sid, info['start_date'].replace('-', ''), datetime.date.today().strftime("%Y%m%d")))
     persist_dir = os.path.join('data', '%s_%s' % (sid, info['start_date'].replace('-', '')))
     cprint('starting {} {}'.format(sid, info['path']), 'green')
     config = {
@@ -100,6 +100,11 @@ def run_today(sid, init, resume):
                 'persist_dir': persist_dir,
             },
         },
+        'extra': {
+            'context_vars': {
+                'sid': sid,
+            }
+        }
     }
     def wapper():
         rqalpha.run_file(info['path'], config)
