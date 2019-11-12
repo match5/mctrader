@@ -10,7 +10,7 @@ from . import running_strategy
 from .stratege import run_today, start_trading
 
 def run_scheduled_tasks():
-    scheduler.every().day.at('20:00').do(update_bundle)
+    scheduler.every().day.at('22:00').do(update_bundle)
     scheduler.every().day.at('09:00').do(start_trading)
     def wapper():
         while True:
