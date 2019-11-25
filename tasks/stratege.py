@@ -28,6 +28,7 @@ def create_and_run(path, account, name):
     running_strategy[str(sid)] = info
     if 9 <= datetime.datetime.now().hour < 15:
         run_today(sid, True, False)
+    save()
 
 def pause(sid):
     info = running_strategy.get(sid, None)
@@ -40,6 +41,7 @@ def pause(sid):
     if proc and proc.is_alive():
         proc.terminate()
         del running_process[sid]
+    save()
 
 def resume(sid, init):
     info = running_strategy.get(sid, None)
@@ -50,6 +52,7 @@ def resume(sid, init):
     info['status'] = 'running'
     if 9 <= datetime.datetime.now().hour < 15:
         run_today(sid, init or not info['inited'], True)
+    save()
 
 def delete(sid):
     info = running_strategy.get(sid, None)
@@ -62,6 +65,7 @@ def delete(sid):
         ignore_errors=True,
     )
     del running_strategy[sid]
+    save()
 
 def run_today(sid, init, resume):
     info = running_strategy.get(sid, None)
@@ -134,4 +138,5 @@ def start_trading():
     for info in running_strategy.values():
         if info.get('status', 'running') == 'running':
             run_today(info['sid'], not info['inited'], info['inited'])
+    save()
     
