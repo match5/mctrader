@@ -12,21 +12,20 @@ from . import running_strategy, running_process
 
 next_sid = 101
 
-def create_and_run(path, account, name):
+def create_and_run(path, broker):
     global next_sid
     sid = str(next_sid)
     next_sid = next_sid + 1
     info = {
         'sid': sid,
-        'name': name,
         'path': path,
         'start_date': datetime.date.today().strftime("%Y-%m-%d"),
         'inited': False,
-        'account': account,
+        'broker': broker,
         'status': 'running',
     }
     running_strategy[str(sid)] = info
-    if 9 <= datetime.datetime.now().hour < 15:
+    if 8 <= datetime.datetime.now().hour < 15:
         run_today(sid, True, False)
     save()
 
@@ -50,7 +49,7 @@ def resume(sid, init):
     if info['status'] == 'running':
         raise Exception('sid:%s is running' % (sid,))
     info['status'] = 'running'
-    if 9 <= datetime.datetime.now().hour < 15:
+    if 8 <= datetime.datetime.now().hour < 15:
         run_today(sid, init or not info['inited'], True)
     save()
 
@@ -84,9 +83,6 @@ def run_today(sid, init, resume):
             'end_date': date,
             'persist': True,
             'persist_mode': 'real_time',
-            'accounts': {
-                'stock': info['account'],
-            }
         },
         'mod': {
             'sys_simulation': {
@@ -102,6 +98,7 @@ def run_today(sid, init, resume):
                 'should_run_init': init,
                 'log_file': log_file,
                 'persist_dir': persist_dir,
+                'start_date': info['start_date'],
             },
         },
         'extra': {
@@ -110,8 +107,13 @@ def run_today(sid, init, resume):
             }
         }
     }
+
+    if info['broker']:
+        config['mod']['mctrader']['broker'] = info['broker']
+
     def wapper():
         rqalpha.run_file(info['path'], config)
+        
     proc = Process(target=wapper)
     proc.daemon = True
     running_process[sid] = proc
@@ -126,7 +128,7 @@ def load():
     global next_sid
     max_sid = max([int(sid) for sid in running_strategy.keys()] + [0])
     next_sid = max_sid + 1 if next_sid <= max_sid else next_sid
-    if 9 <= datetime.datetime.now().hour < 15:
+    if 8 <= datetime.datetime.now().hour < 15:
         start_trading()
 
 def save():

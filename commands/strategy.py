@@ -15,18 +15,17 @@ class Stratege:
         'list all strateges'
         lines = ''
         for info in running_strategy.values():
-            lines = lines + ('\t%s\t%s\t%s\t\t%s\t%s\n' % (info['sid'], info['status'], info['name'], info['start_date'], info['path']))
+            lines = lines + ('%s\t%s\t\t%s\t%s\t%s\n' % (info['sid'], info['status'], info['start_date'], info['path'], info['broker']))
         if lines:
-            cprint('\tsid\tstatus\tname\t\tstart_date\tpath\n' + lines, 'green')
+            cprint('sid\tstatus\t\tstart_date\tpath\t\t\t\tbroker\n' + lines, 'green')
 
     @command
     @argument('path', type=str, positional=True, description='path of you stratege file')
-    @argument('account', type=int, description='starting account')
-    @argument('name', type=str, description='name of the stratege')
-    def new(self, path, account=100000, name='unnamed'):
+    @argument('broker', type=str, description='broker')
+    def new(self, path, broker=None):
         'run a stratege form file'
         try:
-            create_and_run(path, account, name)
+            create_and_run(path, broker)
         except Exception as e:
             cprint(str(e), 'yellow')
 
