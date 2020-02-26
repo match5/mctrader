@@ -3,7 +3,7 @@ from nubia import command, argument
 from termcolor import cprint
 
 from tasks import running_strategy
-from tasks.stratege import create_and_run, pause, resume, delete
+from tasks.stratege import create_and_run, pause, run, delete
 
 @command('trade')
 class Stratege:
@@ -44,17 +44,19 @@ class Stratege:
     def resume(self, sid, init=False):
         'resume a paused stratege'
         try:
-            resume(sid, init)
+            run(sid, init, True)
         except Exception as e:
             cprint(str(e), 'yellow')
 
     @command
     @argument('sid', type=str, positional=True, description='id of stratege')
-    def restart(self, sid):
+    @argument('init', type=bool, description='whether call init()')
+    @argument('resume', type=bool, description='whether run as resume')
+    def restart(self, sid, init=False, resume=True):
         'restart a running stratege'
         try:
             pause(sid)
-            resume(sid, True)
+            run(sid, init, resume)
         except Exception as e:
             cprint(str(e), 'yellow')
 

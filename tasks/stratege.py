@@ -42,7 +42,7 @@ def pause(sid):
         del running_process[sid]
     save()
 
-def resume(sid, init):
+def run(sid, init, resume):
     info = running_strategy.get(sid, None)
     if info is None:
         raise Exception('sid:%s not exists' % (sid,))
@@ -50,7 +50,7 @@ def resume(sid, init):
         raise Exception('sid:%s is running' % (sid,))
     info['status'] = 'running'
     if 8 <= datetime.datetime.now().hour < 15:
-        run_today(sid, init or not info['inited'], True)
+        run_today(sid, init or not info['inited'], resume)
     save()
 
 def delete(sid):
